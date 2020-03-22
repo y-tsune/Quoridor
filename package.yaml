@@ -21,12 +21,13 @@ description:         Please see the README on GitHub at <https://github.com/y-ts
 
 dependencies:
 - base >= 4.7 && < 5
+- parallel
 
 library:
   source-dirs: src
 
 executables:
-  Quoridor-exe:
+  Quoridor:
     main:                Main.hs
     source-dirs:         app
     ghc-options:

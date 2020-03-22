@@ -7,6 +7,8 @@ module Main where
 import Data.Char
 import Data.List
 import System.IO
+import Control.Parallel
+import Control.Parallel.Strategies
 
 size :: Int
 size = 3
