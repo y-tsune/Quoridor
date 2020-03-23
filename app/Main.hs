@@ -14,10 +14,15 @@ import qualified Data.Array.Repa as R
 size :: Int
 size = 9
 
+data State = State Pos Pos Player
+type Pos = (Int, Int)
 type Grid = [[Player]]
 
 data Player = O | B | X
               deriving (Eq, Ord, Show)
+
+genInitState :: State
+genInitState = State (0,4) (8,4) O
 
 empty :: Grid 
 empty = (insertPlayer O blankLine) : foldr (:) [insertPlayer X blankLine]  (replicate (size-1) blankLine)
@@ -46,8 +51,10 @@ insertPlayer p xs = xs' ++ [p] ++ ys
 --             xs = length (filter (== X) ps)
 --             ps = concat g
 
--- wins :: Player -> Grid -> Bool
--- wins p g = any line (rows ++ cols ++ dias)
+wins :: Player -> Grid -> Bool
+wins O g = any (== O) $ head g
+wins X g = any (== X) $ last g
+-- line (rows ++ cols ++ dias)
 --            where
 --               line = all (== p)
 --               rows = g
@@ -85,13 +92,17 @@ interleave x (y:ys) = y : x : interleave x ys
 
 -- -- Making a move
 
-valid :: Grid -> Int -> Bool
-valid g i = 0 <= i && i < size^2 && concat g !! i == B
+commands :: [Char]
+commands = ['h', 'j', 'k', 'l']
 
-move:: Grid -> (Int, Int) -> Player -> [Grid]
-move g (i, j) p =
-   if valid g (i*size+j) then [chop size (xs ++ [p] ++ ys)] else []
-   where (xs,B:ys) = splitAt (i*size+j) (concat g)
+-- valid :: State -> Char -> Player -> Bool
+-- valid g c = any (==c) commands && 0 <= i && i < size^2 && concat g !! i == B
+--   where 
+
+-- move:: Grid -> Char -> Player -> [Grid]
+-- move g c p =
+--    if valid g c p then [chop size (xs ++ [p] ++ ys)] else []
+--    where (xs,B:ys) = splitAt (i*size+j) (concat g)
 
 chop :: Int -> [a] -> [[a]]
 chop n [] = []
@@ -99,19 +110,22 @@ chop n xs = take n xs : chop n (drop n xs)
 
 -- -- Reading a natural number
 
--- getNat :: String -> IO Int
--- getNat prompt = do putStr prompt
---                    xs <- getLine
---                    if xs /= [] && all isDigit xs then
---                       return (read xs)
---                    else
---                       do putStrLn "ERROR: Invalid number"
---                          getNat prompt
+getCommand :: String -> IO Int
+getCommand prompt = do putStr prompt
+                       xs <- getLine
+                       if xs /= [] && all isAlpha xs then
+                         return (read xs)
+                       else
+                         do putStrLn "ERROR: Invalid number"
+                            getCommand prompt
 
 -- -- Human vs human
 
 -- tictactoe :: IO ()
 -- tictactoe = run empty O 
+
+main :: IO ()
+main = print 1--run empty O
 
 -- run :: Grid -> Player -> IO ()
 -- run g p = do cls
@@ -122,7 +136,6 @@ chop n xs = take n xs : chop n (drop n xs)
 -- run' :: Grid -> Player -> IO ()
 -- run' g p | wins O g  = putStrLn "Player O wins!\n"
 --          | wins X g  = putStrLn "Player X wins!\n"
---          | full g    = putStrLn "It's a draw!\n"
 --          | otherwise =
 --               do i <- getNat (prompt p)
 --                  case move g i p of
@@ -139,6 +152,7 @@ chop n xs = take n xs : chop n (drop n xs)
 -- goto :: (Int,Int) -> IO ()
 -- goto (x,y) = putStr ("\ESC[" ++ show y ++ ";" ++ show x ++ "H")
 
+  
 -- -- Game trees
 
 -- data Tree a = Node a [Tree a]
@@ -190,9 +204,9 @@ chop n xs = take n xs : chop n (drop n xs)
 -- main = do hSetBuffering stdout NoBuffering
 --           play empty O
 
-main :: IO ()
-main = do
-  print 1
+-- main :: IO ()
+-- main = do
+--   print 1
 
 -- play :: Grid -> Player -> IO ()
 -- play g p = do cls
