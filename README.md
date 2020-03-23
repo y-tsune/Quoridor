@@ -7,3 +7,7 @@ stack build
 ```
 stack exec -- Quoridor exe
 ```
+## Repl
+```
+stack ghci
+```
