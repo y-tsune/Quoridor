@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f731c2b997e23d622c9c7c35f02c4c3e3e7a22d86fd0b2e73828c14bbc62044c
+-- hash: 9951a4fe69e3122a6a6e58290bd9d68010514e4db3d8f78855fb72c46f13beeb
 
 name:           Quoridor
 version:        0.1.0.0
@@ -34,6 +34,7 @@ library
       src
   build-depends:
       base >=4.7 && <5
+    , mtl
     , parallel
     , repa >=3.2 && <3.5
   default-language: Haskell2010
@@ -48,6 +49,7 @@ executable Quoridor
   build-depends:
       Quoridor
     , base >=4.7 && <5
+    , mtl
     , parallel
     , repa >=3.2 && <3.5
   default-language: Haskell2010
@@ -63,6 +65,7 @@ test-suite Quoridor-test
   build-depends:
       Quoridor
     , base >=4.7 && <5
+    , mtl
     , parallel
     , repa >=3.2 && <3.5
   default-language: Haskell2010

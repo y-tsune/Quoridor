@@ -23,6 +23,7 @@ dependencies:
 - base >= 4.7 && < 5
 - parallel
 - repa >= 3.2 && < 3.5
+- mtl
 
 library:
   source-dirs: src

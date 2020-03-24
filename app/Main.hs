@@ -10,29 +10,58 @@ import System.IO
 import Control.Parallel
 import Control.Parallel.Strategies
 import qualified Data.Array.Repa as R
+import Control.Monad.State
 
 size :: Int
 size = 9
 
-data State = State Pos Pos Player
+data Game = Game { o'pos :: Pos,
+                   x'pos :: Pos,
+                   o'wall :: Int,
+                   x'wall :: Int,
+                   walls :: [Wall_Pos],
+                   turn :: Player
+                 }
+
 type Pos = (Int, Int)
-type Grid = [[Player]]
+  
+type Wall_Pos = (Dir, Pos)
 
-data Player = O | B | X
-              deriving (Eq, Ord, Show)
+data Dir = H | V
+  deriving Show
 
-genInitState :: State
-genInitState = State (0,4) (8,4) O
+data Player = O | X
+  deriving Show
 
-empty :: Grid 
-empty = (insertPlayer O blankLine) : foldr (:) [insertPlayer X blankLine]  (replicate (size-1) blankLine)
-  where blankLine = replicate size B
+empty :: Game
+empty = Game (0, 4) (8, 4) 10 10 [] O
 
-insertPlayer :: Player -> [Player] -> [Player]
-insertPlayer p xs = xs' ++ [p] ++ ys
-  where spAt = length xs `div` 2
-        xs' = take spAt xs
-        B:ys = drop spAt xs
+
+-- Displaying a Game
+-- putGame :: Game -> IO ()
+-- putGame =
+-- putStrLn $ unlines $ (replicate 3 $ concat $ interleave "." $ replicate 9 "   ") ++ [concat $ replicate 9 "...."]
+
+
+-- State Pos Pos Player
+
+-- type Grid = [[Player]]
+
+-- data Player = O | B | X
+--               deriving (Eq, Ord, Show)
+
+-- genInitState :: State
+-- genInitState = State (0,4) (8,4) O
+
+-- empty :: Grid 
+-- empty = (insertPlayer O blankLine) : foldr (:) [insertPlayer X blankLine]  (replicate (size-1) blankLine)
+--   where blankLine = replicate size B
+
+-- insertPlayer :: Player -> [Player] -> [Player]
+-- insertPlayer p xs = xs' ++ [p] ++ ys
+--   where spAt = length xs `div` 2
+--         xs' = take spAt xs
+--         B:ys = drop spAt xs
 
 -- next :: Player -> Player
 -- next O = X
@@ -51,9 +80,9 @@ insertPlayer p xs = xs' ++ [p] ++ ys
 --             xs = length (filter (== X) ps)
 --             ps = concat g
 
-wins :: Player -> Grid -> Bool
-wins O g = any (== O) $ head g
-wins X g = any (== X) $ last g
+-- wins :: Player -> Grid -> Bool
+-- wins O g = any (== O) $ head g
+-- wins X g = any (== X) $ last g
 -- line (rows ++ cols ++ dias)
 --            where
 --               line = all (== p)
@@ -69,31 +98,31 @@ wins X g = any (== X) $ last g
 
 -- -- Displaying a grid
 
-putGrid :: Grid -> IO ()
-putGrid =
-   putStrLn . unlines . concat . interleave bar . map showRow
-   where bar = [replicate ((size*4)-1) '.']
+-- putGrid :: Grid -> IO ()
+-- putGrid =
+--    putStrLn . unlines . concat . interleave bar . map showRow
+--    where bar = [replicate ((size*4)-1) '.']
 
-showRow :: [Player] -> [String]
-showRow = beside . interleave bar . map showPlayer
-          where
-             beside = foldr1 (zipWith (++))
-             bar    = replicate 3 "."
+-- showRow :: [Player] -> [String]
+-- showRow = beside . interleave bar . map showPlayer
+--           where
+--              beside = foldr1 (zipWith (++))
+--              bar    = replicate 3 "."
 
-showPlayer :: Player -> [String]
-showPlayer O = ["   ", " O ", "   "]
-showPlayer B = ["   ", "   ", "   "]
-showPlayer X = ["   ", " X ", "   "]
+-- showPlayer :: Player -> [String]
+-- showPlayer O = ["   ", " O ", "   "]
+-- --showPlayer B = ["   ", "   ", "   "]
+-- showPlayer X = ["   ", " X ", "   "]
 
-interleave :: a -> [a] -> [a]
-interleave x []     = []
-interleave x [y]    = [y]
-interleave x (y:ys) = y : x : interleave x ys
+-- interleave :: a -> [a] -> [a]
+-- interleave x []     = []
+-- interleave x [y]    = [y]
+-- interleave x (y:ys) = y : x : interleave x ys
 
--- -- Making a move
+-- -- -- Making a move
 
-commands :: [Char]
-commands = ['h', 'j', 'k', 'l']
+-- commands :: [Char]
+-- commands = ['h', 'j', 'k', 'l']
 
 -- valid :: State -> Char -> Player -> Bool
 -- valid g c = any (==c) commands && 0 <= i && i < size^2 && concat g !! i == B
@@ -104,25 +133,25 @@ commands = ['h', 'j', 'k', 'l']
 --    if valid g c p then [chop size (xs ++ [p] ++ ys)] else []
 --    where (xs,B:ys) = splitAt (i*size+j) (concat g)
 
-chop :: Int -> [a] -> [[a]]
-chop n [] = []
-chop n xs = take n xs : chop n (drop n xs)
+-- chop :: Int -> [a] -> [[a]]
+-- chop n [] = []
+-- chop n xs = take n xs : chop n (drop n xs)
 
--- -- Reading a natural number
+-- -- -- Reading a natural number
 
-getCommand :: String -> IO Int
-getCommand prompt = do putStr prompt
-                       xs <- getLine
-                       if xs /= [] && all isAlpha xs then
-                         return (read xs)
-                       else
-                         do putStrLn "ERROR: Invalid number"
-                            getCommand prompt
+-- getCommand :: String -> IO Int
+-- getCommand prompt = do putStr prompt
+--                        xs <- getLine
+--                        if xs /= [] && all isAlpha xs then
+--                          return (read xs)
+--                        else
+--                          do putStrLn "ERROR: Invalid number"
+--                             getCommand prompt
 
--- -- Human vs human
+-- -- -- Human vs human
 
--- tictactoe :: IO ()
--- tictactoe = run empty O 
+-- -- tictactoe :: IO ()
+-- -- tictactoe = run empty O 
 
 main :: IO ()
 main = print 1--run empty O
