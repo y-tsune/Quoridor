@@ -27,15 +27,30 @@ type Pos = (Int, Int)
   
 type Wall_Pos = (Dir, Pos)
 
+type Board = [[Maybe Player]]
+
 data Dir = H | V
   deriving Show
 
 data Player = O | X
   deriving Show
 
-empty :: Game
-empty = Game (0, 4) (8, 4) 10 10 [] O
 
+initGame :: Game
+initGame = Game (0, 4) (8, 4) 10 10 [] O
+
+emptyBoard :: Board
+emptyBoard = replicate size $ replicate size Nothing
+
+insertPlayer :: Board -> Pos -> Player -> Board
+insertPlayer b (y,x) p = xs ++ [(xs' ++ [Just p] ++ ys')] ++ ys
+  where (xs,ys) = splitAt y b
+        (xs',Nothing:ys') = splitAt x (head ys) 
+
+showBoard :: Board -> IO ()
+showBoard b = putStrLn $ unlines $ map concat $ map (interleave "|") xs
+  where xs = take size (map (map showPlayer) b)
+        
 
 -- Displaying a Game
 -- putGame :: Game -> IO ()
@@ -109,15 +124,14 @@ empty = Game (0, 4) (8, 4) 10 10 [] O
 --              beside = foldr1 (zipWith (++))
 --              bar    = replicate 3 "."
 
--- showPlayer :: Player -> [String]
--- showPlayer O = ["   ", " O ", "   "]
--- --showPlayer B = ["   ", "   ", "   "]
--- showPlayer X = ["   ", " X ", "   "]
+showPlayer :: Maybe Player -> String
+showPlayer (Just p) = " " ++ show p ++ " "
+showPlayer Nothing = "   "
 
--- interleave :: a -> [a] -> [a]
--- interleave x []     = []
--- interleave x [y]    = [y]
--- interleave x (y:ys) = y : x : interleave x ys
+interleave :: a -> [a] -> [a]
+interleave x []     = []
+interleave x [y]    = [y]
+interleave x (y:ys) = y : x : interleave x ys
 
 -- -- -- Making a move
 
