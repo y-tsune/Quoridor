@@ -29,6 +29,8 @@ type Wall_Pos = (Dir, Pos)
 
 type Board = [[Maybe Player]]
 
+type Walls = [[String]]
+
 data Dir = H | V
   deriving Show
 
@@ -42,8 +44,13 @@ initGame = Game (0, 4) (8, 4) 10 10 [] O
 emptyBoard :: Board
 emptyBoard = replicate size $ replicate size Nothing
 
+emptyWalls :: Walls
+emptyWalls = replicate (size-1) $ replicate size "."
+
+-- Display a Board
+
 insertPlayer :: Board -> Pos -> Player -> Board
-insertPlayer b (y,x) p = xs ++ [(xs' ++ [Just p] ++ ys')] ++ ys
+insertPlayer b (y,x) p = xs ++ [(xs' ++ [Just p] ++ ys')] ++ (drop 1 ys)
   where (xs,ys) = splitAt y b
         (xs',Nothing:ys') = splitAt x (head ys) 
 
@@ -51,7 +58,21 @@ showBoard :: Board -> IO ()
 showBoard b = putStrLn $ unlines $ map concat $ map (interleave "|") xs
   where xs = take size (map (map showPlayer) b)
         
+vWallsInsert :: Walls -> [Wall_Pos] -> Walls
+vWallsInsert w [] = w
+vWallsInsert w ((H,_):xs) = vWallsInsert w xs
+vWallsInsert w ((V,(y,x)):xs) = vWallsInsert (xs' ++ [xs''++ ["|","|"]++ys''] ++ (drop 1 ys')) xs
+  where (xs',ys') = splitAt x w
+        (xs'',".":".":ys'') = splitAt y (head ys')
 
+convertWalls :: Walls -> [String]
+convertWalls w = foldr f [] w
+  where f [] y = y
+        f (x:xs) y = x:y
+
+
+        
+  
 -- Displaying a Game
 -- putGame :: Game -> IO ()
 -- putGame =
